@@ -11,12 +11,16 @@ import {
   TrendingUp, TrendingDown, Circle, Layers, Globe,
   MonitorSpeaker, Sparkles, Brain, Database, Network,
   ShieldCheck, AlertOctagon, FileSearch, Folder, File,
-  MoreHorizontal, Plus, Home, Command, Moon, Sun
+  MoreHorizontal, Plus, Home, Command, Moon, Sun, LogOut
 } from "lucide-react";
 import {
   AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar
 } from "recharts";
+import { LoginScreen } from "./components/LoginScreen";
+import { useUser } from "./context/UserContext";
+import { getFirstName, getTimelineIcon, getUserInitial } from "./lib/helpers";
+import type { ChatMessage, RecentFile } from "./types/user";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Page =
@@ -52,14 +56,6 @@ const productivityData = [
   { day: "Sat", score: 45, files: 11 },
   { day: "Sun", score: 33, files: 8 },
 ];
-const recentFiles = [
-  { name: "DBMS_Presentation.pptx", type: "ppt", size: "4.2 MB", modified: "2h ago", tags: ["study", "database"], path: "/Documents/University" },
-  { name: "Project_Helix_Design.fig", type: "fig", size: "18.7 MB", modified: "4h ago", tags: ["design", "ui"], path: "/Projects/Helix" },
-  { name: "budget_q4_2025.xlsx", type: "xlsx", size: "892 KB", modified: "Yesterday", tags: ["finance"], path: "/Documents/Finance" },
-  { name: "system_architecture.pdf", type: "pdf", size: "2.1 MB", modified: "2 days ago", tags: ["tech", "docs"], path: "/Documents/Work" },
-  { name: "meeting_notes_jan.docx", type: "docx", size: "340 KB", modified: "3 days ago", tags: ["meetings"], path: "/Documents/Work" },
-  { name: "wallpaper_mountains.jpg", type: "jpg", size: "5.6 MB", modified: "1 week ago", tags: ["photos"], path: "/Pictures" },
-];
 const folderTree = [
   {
     name: "Home", icon: Home, expanded: true, children: [
@@ -77,18 +73,6 @@ const folderTree = [
       { name: "Videos", icon: Film, expanded: false, children: [] },
     ]
   }
-];
-const timelineItems = [
-  { date: "2026-07-23", time: "11:42 AM", type: "download", label: "Downloaded Node.js Installer", icon: Download, color: "text-blue-400" },
-  { date: "2026-07-23", time: "10:15 AM", type: "meeting", label: "Meeting: Q3 Sprint Planning — 47 min", icon: Calendar, color: "text-purple-400" },
-  { date: "2026-07-23", time: "09:30 AM", type: "screenshot", label: "Screenshot: Figma wireframe", icon: Image, color: "text-cyan-400" },
-  { date: "2026-07-22", time: "04:22 PM", type: "file", label: "Edited DBMS_Presentation.pptx", icon: FileText, color: "text-green-400" },
-  { date: "2026-07-22", time: "02:10 PM", type: "project", label: "Project Helix — 2h 12m session", icon: Layers, color: "text-blue-400" },
-  { date: "2026-07-22", time: "10:00 AM", type: "backup", label: "Automatic backup completed — 4.2 GB", icon: CloudUpload, color: "text-emerald-400" },
-  { date: "2026-07-21", time: "08:55 PM", type: "download", label: "Downloaded VS Code update 1.91", icon: Download, color: "text-blue-400" },
-  { date: "2026-07-21", time: "03:30 PM", type: "meeting", label: "Meeting: Design Review — 28 min", icon: Calendar, color: "text-purple-400" },
-  { date: "2026-07-20", time: "06:15 PM", type: "file", label: "Created budget_q4_2025.xlsx", icon: FileText, color: "text-green-400" },
-  { date: "2026-07-20", time: "11:20 AM", type: "screenshot", label: "Screenshot: System dashboard stats", icon: Image, color: "text-cyan-400" },
 ];
 const automationCards = [
   { id: 1, title: "Auto-Organize Downloads", desc: "Sort downloaded files by type into respective folders automatically", icon: FolderPlus, enabled: true, lastRun: "2 hrs ago", runs: 1240 },
@@ -117,13 +101,6 @@ const securityAlerts = [
   { severity: "medium", msg: "App 'QuickShare.exe' requested admin privileges", icon: AlertTriangle, time: "3h ago" },
   { severity: "low", msg: "Firewall blocked 3 outbound connections from Chrome", icon: Shield, time: "5h ago" },
   { severity: "info", msg: "Security definitions updated to version 2026.07.23", icon: Info, time: "6h ago" },
-];
-const chatHistory = [
-  { role: "assistant", text: "Hi! I'm Helix AI. I can help you find files, analyze your system, automate tasks, or answer questions. What would you like to do today?", ts: "10:01 AM" },
-  { role: "user", text: "Find my DBMS presentation from last week", ts: "10:03 AM" },
-  { role: "assistant", text: "Found it! DBMS_Presentation.pptx — located in /Documents/University. Last modified 2 hours ago, 4.2 MB. It contains 24 slides covering ER diagrams, normalization, and SQL joins. Want me to open it or show related files?", ts: "10:03 AM" },
-  { role: "user", text: "What's the current CPU temperature?", ts: "10:05 AM" },
-  { role: "assistant", text: "Your CPU is currently running at 62°C — within normal range. Peak this session was 74°C during your 10 AM compilation task. I recommend ensuring your cooling paste is refreshed if you regularly exceed 80°C during workloads.", ts: "10:05 AM" },
 ];
 const suggestedPrompts = [
   "Show me large files over 1GB",
@@ -211,6 +188,8 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 // ─── Pages ────────────────────────────────────────────────────────────────────
 function Dashboard() {
+  const { user, userData } = useUser();
+  const recentFiles = userData.recentFiles;
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 2000);
@@ -224,7 +203,7 @@ function Dashboard() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Good morning, Alex</h1>
+          <h1 className="text-2xl font-semibold text-white">Good morning, {getFirstName(user?.name ?? "User")}</h1>
           <p className="text-sm text-blue-300/70 mt-0.5">Wednesday, July 23, 2026 · System running optimally</p>
         </div>
         <div className="flex gap-2">
@@ -382,20 +361,29 @@ function Dashboard() {
 }
 
 function AIAssistant() {
-  const [messages, setMessages] = useState(chatHistory);
+  const { userData, updateUserData } = useUser();
+  const [messages, setMessages] = useState<ChatMessage[]>(userData.chatHistory);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setMessages(userData.chatHistory);
+  }, [userData.chatHistory]);
+
   const send = () => {
     if (!input.trim()) return;
-    const userMsg = { role: "user", text: input, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
-    setMessages(m => [...m, userMsg]);
+    const userMsg: ChatMessage = { role: "user", text: input, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
+    const nextMessages = [...messages, userMsg];
+    setMessages(nextMessages);
+    updateUserData({ chatHistory: nextMessages });
     setInput("");
     setTyping(true);
     setTimeout(() => {
-      const resp = { role: "assistant", text: "I understand your request. Let me analyze your system and files to provide you with the most relevant information. Based on my analysis, I found several relevant items in your workspace that match your query. Would you like me to take any specific action?", ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
-      setMessages(m => [...m, resp]);
+      const resp: ChatMessage = { role: "assistant", text: "I understand your request. Let me analyze your system and files to provide you with the most relevant information. Based on my analysis, I found several relevant items in your workspace that match your query. Would you like me to take any specific action?", ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
+      const withResp = [...nextMessages, resp];
+      setMessages(withResp);
+      updateUserData({ chatHistory: withResp });
       setTyping(false);
     }, 1800);
   };
@@ -485,6 +473,8 @@ function AIAssistant() {
 }
 
 function SmartFileManager() {
+  const { userData } = useUser();
+  const recentFiles = userData.recentFiles;
   const [view, setView] = useState<"grid" | "list">("list");
   const [selected, setSelected] = useState<string | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(["Home", "Documents"]));
@@ -635,8 +625,18 @@ function SmartFileManager() {
 }
 
 function SemanticSearch() {
-  const [query, setQuery] = useState("Find my DBMS presentation");
+  const { userData, updateUserData } = useUser();
+  const [query, setQuery] = useState(userData.searchQuery);
   const [searched, setSearched] = useState(true);
+
+  useEffect(() => {
+    setQuery(userData.searchQuery);
+  }, [userData.searchQuery]);
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    updateUserData({ searchQuery: value });
+  };
   const results = [
     { name: "DBMS_Presentation.pptx", relevance: 98, type: "ppt", path: "/Documents/University", preview: "ER Diagrams, Normalization, SQL Joins — 24 slides", tags: ["study", "database"] },
     { name: "database_notes.pdf", relevance: 82, type: "pdf", path: "/Documents/University", preview: "Comprehensive notes on relational databases, queries, and indexing", tags: ["study", "notes"] },
@@ -656,12 +656,12 @@ function SemanticSearch() {
           <Search size={18} className="text-blue-400 flex-shrink-0" />
           <input
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => handleQueryChange(e.target.value)}
             onKeyDown={e => e.key === "Enter" && setSearched(true)}
             className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none"
             placeholder='Try "Find my DBMS PPT" or "photos from July"...'
           />
-          {query && <button onClick={() => { setQuery(""); setSearched(false); }} className="text-gray-600 hover:text-gray-400"><X size={14} /></button>}
+          {query && <button onClick={() => { handleQueryChange(""); setSearched(false); }} className="text-gray-600 hover:text-gray-400"><X size={14} /></button>}
         </div>
         <button onClick={() => setSearched(true)} className="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors">Search</button>
       </div>
@@ -708,7 +708,7 @@ function SemanticSearch() {
             <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2"><Sparkles size={14} className="text-blue-400" /> Related Searches</h3>
             <div className="flex flex-wrap gap-2">
               {["database assignment", "SQL notes 2025", "university study materials", "normalization diagrams", "ERD templates"].map(s => (
-                <button key={s} onClick={() => { setQuery(s); }} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/8 text-xs text-gray-400 hover:text-gray-200 hover:bg-white/10 transition-all">
+                <button key={s} onClick={() => { handleQueryChange(s); setSearched(true); }} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/8 text-xs text-gray-400 hover:text-gray-200 hover:bg-white/10 transition-all">
                   {s}
                 </button>
               ))}
@@ -721,6 +721,8 @@ function SemanticSearch() {
 }
 
 function AITimeline() {
+  const { userData } = useUser();
+  const timelineItems = userData.timelineItems;
   const [filter, setFilter] = useState("all");
   const categories = ["all", "file", "download", "meeting", "screenshot", "project", "backup"];
   const grouped: Record<string, typeof timelineItems> = {};
@@ -760,10 +762,12 @@ function AITimeline() {
               <Badge color="blue">{items.length} events</Badge>
             </div>
             <div className="space-y-2 pl-2 border-l border-white/[0.06]">
-              {items.map((item, i) => (
+              {items.map((item, i) => {
+                const Icon = getTimelineIcon(item.iconType);
+                return (
                 <div key={i} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer ml-3">
                   <div className={`w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0 ${item.color}`}>
-                    <item.icon size={14} />
+                    <Icon size={14} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-300">{item.label}</p>
@@ -771,7 +775,7 @@ function AITimeline() {
                   </div>
                   <span className="text-xs text-gray-600 font-mono flex-shrink-0">{item.time}</span>
                 </div>
-              ))}
+              );})}
             </div>
           </div>
         ))}
@@ -781,7 +785,14 @@ function AITimeline() {
 }
 
 function AutomationCenter() {
-  const [toggles, setToggles] = useState<Record<number, boolean>>(Object.fromEntries(automationCards.map(c => [c.id, c.enabled])));
+  const { userData, updateUserData } = useUser();
+  const toggles = userData.automationToggles;
+
+  const setToggle = (id: number) => {
+    updateUserData({
+      automationToggles: { ...toggles, [id]: !toggles[id] },
+    });
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -805,7 +816,7 @@ function AutomationCenter() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-semibold text-gray-200">{card.title}</h3>
-                  <ToggleSwitch enabled={toggles[card.id]} onChange={() => setToggles(t => ({ ...t, [card.id]: !t[card.id] }))} />
+                  <ToggleSwitch enabled={!!toggles[card.id]} onChange={() => setToggle(card.id)} />
                 </div>
                 <p className="text-xs text-gray-500 leading-relaxed mb-3">{card.desc}</p>
                 <div className="flex items-center gap-4 text-xs text-gray-600 font-mono">
@@ -1262,11 +1273,19 @@ function Analytics() {
 }
 
 function SettingsPage() {
-  const [notifications, setNotifications] = useState(true);
-  const [aiSuggestions, setAiSuggestions] = useState(true);
-  const [autoBackup, setAutoBackup] = useState(true);
-  const [darkMode] = useState(true);
-  const [privacyMode, setPrivacyMode] = useState(false);
+  const { user, userData, updateSettings, updateProfileName, logout } = useUser();
+  const { notifications, aiSuggestions, autoBackup, privacyMode } = userData.settings;
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(user?.name ?? "");
+
+  useEffect(() => {
+    setNameInput(user?.name ?? "");
+  }, [user?.name]);
+
+  const saveName = () => {
+    updateProfileName(nameInput);
+    setEditingName(false);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -1279,13 +1298,29 @@ function SettingsPage() {
       <GlassCard className="p-5">
         <h3 className="text-sm font-semibold text-gray-300 mb-4">Profile</h3>
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">A</div>
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">
+            {getUserInitial(user?.name ?? "U")}
+          </div>
           <div>
-            <p className="text-base font-semibold text-white">Alex Morrison</p>
-            <p className="text-sm text-gray-500">alex.morrison@email.com</p>
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm text-white outline-none focus:border-blue-500/50"
+                />
+                <button onClick={saveName} className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs">Save</button>
+                <button onClick={() => setEditingName(false)} className="px-3 py-1.5 rounded-lg bg-white/5 text-gray-400 text-xs">Cancel</button>
+              </div>
+            ) : (
+              <p className="text-base font-semibold text-white">{user?.name}</p>
+            )}
+            <p className="text-sm text-gray-500">{user?.email}</p>
             <p className="text-xs text-blue-400 mt-1">Helix Pro · Expires Dec 2026</p>
           </div>
-          <button className="ml-auto px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm hover:bg-white/10 transition-colors">Edit Profile</button>
+          {!editingName && (
+            <button onClick={() => setEditingName(true)} className="ml-auto px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm hover:bg-white/10 transition-colors">Edit Profile</button>
+          )}
         </div>
       </GlassCard>
 
@@ -1294,15 +1329,15 @@ function SettingsPage() {
         <h3 className="text-sm font-semibold text-gray-300 mb-4">AI Preferences</h3>
         <div className="space-y-4">
           {[
-            { label: "AI Suggestions", desc: "Get intelligent file organization and task recommendations", val: aiSuggestions, set: setAiSuggestions },
-            { label: "Privacy Mode", desc: "Process all AI tasks locally without cloud sync", val: privacyMode, set: setPrivacyMode },
+            { label: "AI Suggestions", desc: "Get intelligent file organization and task recommendations", key: "aiSuggestions" as const, val: aiSuggestions },
+            { label: "Privacy Mode", desc: "Process all AI tasks locally without cloud sync", key: "privacyMode" as const, val: privacyMode },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-300">{item.label}</p>
                 <p className="text-xs text-gray-600">{item.desc}</p>
               </div>
-              <ToggleSwitch enabled={item.val} onChange={() => item.set(!item.val)} />
+              <ToggleSwitch enabled={item.val} onChange={() => updateSettings({ [item.key]: !item.val })} />
             </div>
           ))}
           <div>
@@ -1343,16 +1378,28 @@ function SettingsPage() {
         <h3 className="text-sm font-semibold text-gray-300 mb-4">Notifications</h3>
         <div className="space-y-3">
           {[
-            { label: "System Alerts", val: notifications, set: setNotifications },
-            { label: "Backup Reminders", val: autoBackup, set: setAutoBackup },
-            { label: "AI Insights", val: aiSuggestions, set: setAiSuggestions },
+            { label: "System Alerts", key: "notifications" as const, val: notifications },
+            { label: "Backup Reminders", key: "autoBackup" as const, val: autoBackup },
+            { label: "AI Insights", key: "aiSuggestions" as const, val: aiSuggestions },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between py-1">
               <p className="text-sm text-gray-300">{item.label}</p>
-              <ToggleSwitch enabled={item.val} onChange={() => item.set(!item.val)} />
+              <ToggleSwitch enabled={item.val} onChange={() => updateSettings({ [item.key]: !item.val })} />
             </div>
           ))}
         </div>
+      </GlassCard>
+
+      {/* Account */}
+      <GlassCard className="p-5 border-blue-500/15">
+        <h3 className="text-sm font-semibold text-gray-300 mb-4">Account</h3>
+        <button
+          onClick={logout}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-gray-300 text-sm hover:bg-white/10 transition-colors"
+        >
+          <LogOut size={14} /> Sign Out
+        </button>
+        <p className="text-xs text-gray-600 mt-2">Signing out will require login again on next launch.</p>
       </GlassCard>
 
       {/* Danger zone */}
@@ -1386,9 +1433,25 @@ const navItems: { id: Page; label: string; icon: typeof LayoutDashboard; group?:
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
+  const { user, isReady, needsLogin } = useUser();
   const [page, setPage] = useState<Page>("dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-3 text-blue-300">
+          <Sparkles size={20} className="animate-pulse" />
+          <span className="text-sm font-medium">Loading Project Helix...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (needsLogin) {
+    return <LoginScreen />;
+  }
 
   const renderPage = () => {
     switch (page) {
@@ -1419,17 +1482,11 @@ export default function App() {
   let lastGroup: string | undefined;
 
   return (
-    <div className="w-full h-screen flex overflow-hidden font-['Inter',sans-serif]" style={{ background: "#080b14" }}>
-      {/* Animated background */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full opacity-[0.06]" style={{ background: "radial-gradient(circle, #3b82f6, transparent)" }} />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #7c3aed, transparent)" }} />
-      </div>
-
+    <div className="w-full h-screen flex overflow-hidden font-['Inter',sans-serif] bg-transparent">
       {/* Sidebar */}
       <aside
         className="flex-shrink-0 flex flex-col border-r border-white/[0.06] relative z-10 transition-all duration-300"
-        style={{ width: collapsed ? 60 : 220, background: "rgba(8,11,22,0.95)", backdropFilter: "blur(20px)" }}
+        style={{ width: collapsed ? 60 : 220, background: "rgba(8,11,22,0.72)", backdropFilter: "blur(20px)" }}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-white/[0.06]">
@@ -1480,7 +1537,7 @@ export default function App() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Topbar */}
-        <header className="flex items-center justify-between px-6 py-3.5 border-b border-white/[0.06] flex-shrink-0" style={{ background: "rgba(8,11,22,0.8)", backdropFilter: "blur(16px)" }}>
+        <header className="flex items-center justify-between px-6 py-3.5 border-b border-white/[0.06] flex-shrink-0" style={{ background: "rgba(8,11,22,0.65)", backdropFilter: "blur(16px)" }}>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-gray-600">Helix</span>
             <ChevronRight size={12} className="text-gray-700" />
@@ -1521,7 +1578,9 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white cursor-pointer">A</div>
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white cursor-pointer" title={user?.name}>
+              {getUserInitial(user?.name ?? "U")}
+            </div>
           </div>
         </header>
 
