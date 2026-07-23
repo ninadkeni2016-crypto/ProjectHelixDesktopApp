@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Brain, Lock, Mail, Sparkles, User } from "lucide-react";
+import { Lock, Mail, User } from "lucide-react";
+import { HelixLogo } from "./HelixLogo";
 import { useUser } from "../context/UserContext";
 
 export function LoginScreen() {
@@ -31,8 +32,8 @@ export function LoginScreen() {
     <div className="min-h-screen w-full flex items-center justify-center p-6 font-['Inter',sans-serif]">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 mb-4">
-            <Sparkles size={24} className="text-white" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <HelixLogo size={72} className="rounded-2xl" />
           </div>
           <h1 className="text-2xl font-semibold text-white mb-2">Welcome to Project Helix</h1>
           <p className="text-sm text-blue-300/70">
@@ -136,7 +137,7 @@ export function LoginScreen() {
           </form>
 
           <div className="mt-6 pt-5 border-t border-white/[0.06] flex items-start gap-3">
-            <Brain size={16} className="text-blue-400 flex-shrink-0 mt-0.5" />
+            <HelixLogo size={20} className="flex-shrink-0 mt-0.5 rounded-md" />
             <p className="text-xs text-gray-500 leading-relaxed">
               Your data, chat history, and timeline are saved locally to your account.
               This setup screen appears only on your first launch.

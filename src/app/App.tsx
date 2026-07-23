@@ -9,7 +9,7 @@ import {
   Calendar, Filter, SortAsc, Grid, List, FolderPlus,
   CloudUpload, RotateCcw, ChevronDown, ChevronUp, X,
   TrendingUp, TrendingDown, Circle, Layers, Globe,
-  MonitorSpeaker, Sparkles, Brain, Database, Network,
+  MonitorSpeaker, Database, Network,
   ShieldCheck, AlertOctagon, FileSearch, Folder, File,
   MoreHorizontal, Plus, Home, Command, Moon, Sun, LogOut
 } from "lucide-react";
@@ -18,6 +18,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar
 } from "recharts";
 import { LoginScreen } from "./components/LoginScreen";
+import { HelixLogo } from "./components/HelixLogo";
 import { useUser } from "./context/UserContext";
 import { getFirstName, getTimelineIcon, getUserInitial } from "./lib/helpers";
 import type { ChatMessage, RecentFile } from "./types/user";
@@ -208,7 +209,7 @@ function Dashboard() {
         </div>
         <div className="flex gap-2">
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-500/15 border border-blue-500/20 text-blue-300 text-sm hover:bg-blue-500/25 transition-colors">
-            <Sparkles size={14} /> AI Insights
+            <HelixLogo size={16} /> AI Insights
           </button>
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm hover:bg-white/10 transition-colors">
             <RefreshCw size={14} /> Refresh
@@ -329,12 +330,16 @@ function Dashboard() {
               { label: "Run Backup", icon: CloudUpload, color: "text-blue-400" },
               { label: "Find Dupes", icon: Copy, color: "text-purple-400" },
               { label: "Clean Temp", icon: Trash2, color: "text-red-400" },
-              { label: "AI Scan", icon: Brain, color: "text-cyan-400" },
+              { label: "AI Scan", icon: null, color: "text-cyan-400", logo: true },
               { label: "Optimize", icon: Zap, color: "text-amber-400" },
               { label: "Security", icon: Shield, color: "text-green-400" },
             ].map(a => (
               <button key={a.label} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all">
-                <a.icon size={18} className={a.color} />
+                {"logo" in a && a.logo ? (
+                  <HelixLogo size={18} />
+                ) : (
+                  a.icon && <a.icon size={18} className={a.color} />
+                )}
                 <span className="text-xs text-gray-400">{a.label}</span>
               </button>
             ))}
@@ -345,8 +350,8 @@ function Dashboard() {
       {/* AI Insight */}
       <GlassCard className="p-5 border-blue-500/20 bg-gradient-to-r from-blue-500/5 to-purple-500/5">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-            <Sparkles size={18} className="text-blue-400" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0">
+            <HelixLogo size={40} />
           </div>
           <div>
             <p className="text-sm font-semibold text-blue-300 mb-1">Helix AI Insight</p>
@@ -396,9 +401,7 @@ function AIAssistant() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-4 px-6 py-4 border-b border-white/[0.06]">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-          <Brain size={18} className="text-white" />
-        </div>
+        <HelixLogo size={40} className="rounded-xl" />
         <div>
           <h2 className="text-base font-semibold text-white">Helix AI Assistant</h2>
           <p className="text-xs text-green-400 flex items-center gap-1"><Circle size={6} fill="#22c55e" className="fill-green-400" /> Online · GPT-4o powered</p>
@@ -410,9 +413,7 @@ function AIAssistant() {
         {messages.map((m, i) => (
           <div key={i} className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
             {m.role === "assistant" && (
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                <Brain size={14} className="text-white" />
-              </div>
+              <HelixLogo size={32} className="rounded-lg flex-shrink-0" />
             )}
             <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${m.role === "user" ? "bg-blue-600 text-white rounded-tr-sm" : "bg-white/[0.06] border border-white/[0.08] text-gray-200 rounded-tl-sm"}`}>
               {m.text}
@@ -422,9 +423,7 @@ function AIAssistant() {
         ))}
         {typing && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-              <Brain size={14} className="text-white" />
-            </div>
+            <HelixLogo size={32} className="rounded-lg flex-shrink-0" />
             <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-white/[0.06] border border-white/[0.08]">
               <div className="flex gap-1">
                 {[0, 1, 2].map(i => (
@@ -705,7 +704,7 @@ function SemanticSearch() {
           </div>
 
           <GlassCard className="p-5">
-            <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2"><Sparkles size={14} className="text-blue-400" /> Related Searches</h3>
+            <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2"><HelixLogo size={16} /> Related Searches</h3>
             <div className="flex flex-wrap gap-2">
               {["database assignment", "SQL notes 2025", "university study materials", "normalization diagrams", "ERD templates"].map(s => (
                 <button key={s} onClick={() => { handleQueryChange(s); setSearched(true); }} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/8 text-xs text-gray-400 hover:text-gray-200 hover:bg-white/10 transition-all">
@@ -947,7 +946,7 @@ function SystemMonitor() {
 
       <GlassCard className="p-5 border-blue-500/20 bg-blue-500/5">
         <div className="flex items-start gap-4">
-          <Brain size={18} className="text-blue-400 flex-shrink-0 mt-0.5" />
+          <HelixLogo size={20} className="flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-blue-300 mb-1">AI Recommendations</p>
             <ul className="text-sm text-gray-400 space-y-1.5">
@@ -1442,7 +1441,7 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-3 text-blue-300">
-          <Sparkles size={20} className="animate-pulse" />
+          <HelixLogo size={28} className="animate-pulse" />
           <span className="text-sm font-medium">Loading Project Helix...</span>
         </div>
       </div>
@@ -1490,9 +1489,7 @@ export default function App() {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-white/[0.06]">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <Sparkles size={14} className="text-white" />
-          </div>
+          <HelixLogo size={32} className="rounded-xl flex-shrink-0" />
           {!collapsed && <span className="font-semibold text-white tracking-tight text-base">Project Helix</span>}
         </div>
 
