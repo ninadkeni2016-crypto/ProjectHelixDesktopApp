@@ -2,6 +2,9 @@ export type ChatMessage = {
   role: "user" | "assistant";
   text: string;
   ts: string;
+  followUpSuggestions?: string[];
+  intent?: string;
+  files?: Array<{ name: string; path: string; size?: string; relevance?: string | number; category?: string }>;
 };
 
 export type RecentFile = {

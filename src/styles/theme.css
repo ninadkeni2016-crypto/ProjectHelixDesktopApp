@@ -218,3 +218,188 @@
     background: transparent;
   }
 }
+
+/* ─── Premium Cohesive Animation System ────────────────────────────────── */
+:root {
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --anim-duration-fast: 160ms;
+  --anim-duration-normal: 240ms;
+  --anim-duration-smooth: 320ms;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes messageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popoverEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* ─── Animation Classes ────────────────────────────────────────────────── */
+.animate-page-enter {
+  animation: pageEnter var(--anim-duration-normal) var(--ease-spring) both;
+  will-change: opacity, transform;
+}
+
+.animate-message-enter {
+  animation: messageEnter var(--anim-duration-normal) var(--ease-spring) both;
+  will-change: opacity, transform;
+}
+
+.animate-modal-enter {
+  animation: modalEnter var(--anim-duration-smooth) var(--ease-spring) both;
+  will-change: opacity, transform;
+}
+
+.animate-backdrop-enter {
+  animation: backdropEnter var(--anim-duration-normal) ease-out both;
+  will-change: opacity;
+}
+
+.animate-popover-enter {
+  animation: popoverEnter var(--anim-duration-fast) var(--ease-spring) both;
+  will-change: opacity, transform;
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--anim-duration-normal) var(--ease-spring) both;
+  will-change: opacity;
+}
+
+.animate-slide-down {
+  animation: slideDown var(--anim-duration-fast) var(--ease-spring) both;
+  will-change: opacity, transform;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 2.5s ease-in-out infinite;
+}
+
+/* Stagger utilities for cards */
+.stagger-1 { animation-delay: 35ms; }
+.stagger-2 { animation-delay: 70ms; }
+.stagger-3 { animation-delay: 105ms; }
+.stagger-4 { animation-delay: 140ms; }
+
+/* ─── Interactive Micro-Interactions ───────────────────────────────────── */
+.glass-card-hover {
+  transition: transform var(--anim-duration-normal) var(--ease-spring),
+              border-color var(--anim-duration-normal) var(--ease-spring),
+              box-shadow var(--anim-duration-normal) var(--ease-spring);
+}
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5), 0 0 16px -2px rgba(59, 130, 246, 0.08);
+}
+
+.btn-interactive {
+  transition: transform var(--anim-duration-fast) var(--ease-spring),
+              background-color var(--anim-duration-fast) var(--ease-spring),
+              border-color var(--anim-duration-fast) var(--ease-spring),
+              box-shadow var(--anim-duration-fast) var(--ease-spring);
+}
+.btn-interactive:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.input-interactive {
+  transition: border-color var(--anim-duration-fast) var(--ease-spring),
+              box-shadow var(--anim-duration-fast) var(--ease-spring),
+              background-color var(--anim-duration-fast) var(--ease-spring);
+}
+.input-interactive:focus {
+  border-color: rgba(59, 130, 246, 0.55);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* ─── Accessibility: Reduced Motion ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

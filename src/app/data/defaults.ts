@@ -4,7 +4,7 @@ export const defaultUserData = (): UserData => ({
   chatHistory: [
     {
       role: "assistant",
-      text: "Hi! I'm Helix AI. I can help you find files, analyze your system, automate tasks, or answer questions. What would you like to do today?",
+      text: "Hi, I'm Helix AI, your intelligent desktop companion. I can help you with Project Helix, search local files, explain your system metrics, automate tasks, or answer general questions. What would you like to explore today?",
       ts: "10:01 AM",
     },
     {
