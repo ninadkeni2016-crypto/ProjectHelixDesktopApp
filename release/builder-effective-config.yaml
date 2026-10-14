@@ -1,0 +1,62 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.projecthelix.desktop
+productName: Project Helix
+copyright: Copyright © 2026 Project Helix
+files:
+  - filter:
+      - dist/**/*
+      - main.js
+      - preload.cjs
+      - '!node_modules/**/*'
+      - '!backend/**/*'
+      - '!python-ai/**/*'
+      - '!src/**/*'
+      - '!.env*'
+      - '!*.md'
+      - '!*.yaml'
+      - '!*.yml'
+      - '!guidelines/**/*'
+      - '!data/**/*'
+      - '!logs/**/*'
+      - '!backups/**/*'
+      - '!release/**/*'
+extraResources:
+  - from: backend
+    to: backend
+    filter:
+      - '**/*'
+      - '!node_modules/.cache/**/*'
+      - '!tests/**/*'
+      - '!nodemon.json'
+      - '!.env.example'
+      - '!logs/**/*'
+      - '!backups/**/*'
+      - '!docs/**/*'
+  - from: python-ai
+    to: python-ai
+    filter:
+      - '**/*'
+      - '!__pycache__/**/*'
+      - '!**/*.pyc'
+      - '!logs/**/*'
+      - '!data/chroma/**/*'
+  - from: public
+    to: public
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: public/images/helix-logo.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: public/images/helix-logo.png
+  uninstallerIcon: public/images/helix-logo.png
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Project Helix
+asar: true
+electronVersion: 31.7.7
