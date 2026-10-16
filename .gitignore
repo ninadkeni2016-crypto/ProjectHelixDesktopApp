@@ -11,3 +11,6 @@ logs/
 *.log
 backups/
 backend/backups/
+
+release/
+ProjectHelix-Windows.zip
